@@ -1,6 +1,7 @@
 from flask          import Flask
 from flask          import render_template
 from flask          import redirect
+from flask          import request
 from libsql_client  import create_client_sync
 from dotenv         import load_dotenv
 import os
@@ -37,6 +38,8 @@ def home():
     result = client.execute("SELECT id, name FROM things")
     things = result.rows
 
+    print(result.rows)
+
     return render_template("pages/home.jinja", things=things)
 
 
@@ -46,18 +49,12 @@ def home():
 @app.get("/thing/<int:id>")
 def show_thing(id):
     client = connect_db()
-
-    sql = """
-        SELECT id, name, price
-        FROM things
-        WHERE id=?
-    """
+    sql = "SELECT id, name, price FROM things WHERE id=?"
     values = [id]
-
     result = client.execute(sql, values)
     thing = result.rows[0]
-
     return render_template("pages/thing.jinja", thing=thing)
+
 
 
 #-----------------------------------------------------------
@@ -68,11 +65,42 @@ def new_thing():
     return render_template("pages/thing-form.jinja")
 
 
+
+#-----------------------------------------------------------
+# Process a new thing
+#-----------------------------------------------------------
+@app.post("/add-thing")
+def add_thing():
+    name = request.form.get("name")
+    price = request.form.get("price")
+
+#Connect to DB
+    client = connect_db()
+
+#Add thing to DB
+    sql = """INSERT INTO things (name, price) VALUES (?, ?)"""
+    values = [name, price]
+    client.execute(sql, values)
+
+#Head to homepage to see form
+    return redirect("/")
+
+
+
+
 #-----------------------------------------------------------
 # Thing deletion
 #-----------------------------------------------------------
 @app.get("/delete/<int:id>")
-def delete_thing(id):
+def delete_thing(id): 
+
+    #Connect to DB
+    client = connect_db()
+
+    sql = "DELETE FROM things WHERE id=?"
+    values = [id]
+    client.execute(sql, values)
+    
     return redirect("/")
 
 
