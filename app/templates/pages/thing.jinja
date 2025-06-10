@@ -1,0 +1,24 @@
+{% extends 'pages/base.jinja' %}
+
+{% block title %}
+
+    Flask and Turso DB Demo - Single Thing
+
+{% endblock %}
+
+
+{% block content %}
+
+    <h1>Thing Details</h1>
+
+    <article>
+
+        <h3>{{ thing.name }}</h3>
+
+        <p>Price: ${{ thing.price }}</p>
+
+    </article>
+
+    <a role="button" href="/">Back to List</a>
+
+{% endblock %}
